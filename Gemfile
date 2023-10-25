@@ -7,5 +7,6 @@ gemspec
 
 gem 'bundler'
 gem 'pry'
+gem 'rack-test'
 gem "rake"
 gem "rspec"
