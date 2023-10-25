@@ -1,38 +1,65 @@
-# E2eTestingOnRails
+# Utility library for E2E testing on Rails.
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/e2e_testing_on_rails`. To experiment with that code, run `bin/console` for an interactive prompt.
+For E2E testing your Rails app without Ruby-based engine, you might need to
 
-TODO: Delete this and the text above, and describe your gem
+- Create a test user with FactoryBot
+- Mock external API calls and some methods
+- Begin/rollback transactions for each test
+
+This gem provides rack middlewared for such purposes.
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'e2e_testing_on_rails'
+gem 'e2e_testing_on_rails', github: 'YusukeIwaki/e2e_testing_on_rails'
 ```
 
-And then execute:
-
-    $ bundle install
-
-Or install it yourself as:
-
-    $ gem install e2e_testing_on_rails
+then execute `bundle install`.
 
 ## Usage
 
-TODO: Write usage instructions here
+```
+RAILS_ENV=test bundle exec rails s
+```
 
-## Development
+Control endpoints are automatically defined.
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+### `/__e2e__/factory_bot/create`
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+```
+echo '{ name: "YusukeIwaki", password: "hogehoge" }' | http POST http://localhost:3000/__e2e__/factory_bot/create?name=user
+```
 
-## Contributing
+This internally calls `FactoryBot.create(:user, name: "YusukeIwaki", password: "hogehoge")` and return the instance as JSON.
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/e2e_testing_on_rails. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/[USERNAME]/e2e_testing_on_rails/blob/master/CODE_OF_CONDUCT.md).
+```
+{
+  "id": 123,
+  "name": "YusukeIwaki",
+  "created_at": "2023-10-25T15:13:35.712Z",
+  "updated_at": "2023-10-25T15:13:35.712Z"
+}
+```
+
+### `/__e2e__/begin_transaction`, `/__e2e__/rollback_transaction`
+
+Just issue `BEGIN` and `ROLLBACK`. Useful for transactional test.
+
+### `/__e2e__/eval`
+
+Allow to evaluate arbitrary Ruby code. Useful for mocking.
+
+```
+echo 'SimpleStub.for_instance_method(ApplicationController, :current_user) { User.last }.apply!' | http POST http://localhost:3000/__e2e__/eval
+```
+
+```
+echo 'SimpleStub.for_instance_method(ApplicationController, :current_user) { User.last }.reset!' | http POST http://localhost:3000/__e2e__/eval
+```
+
+[simple_stub](https://github.com/YusukeIwaki/simple_stub) would be the best choice for mocking with this method.
 
 ## License
 
@@ -41,4 +68,3 @@ The gem is available as open source under the terms of the [MIT License](https:/
 ## Code of Conduct
 
 Everyone interacting in the E2eTestingOnRails project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/e2e_testing_on_rails/blob/master/CODE_OF_CONDUCT.md).
-# e2e_testing_on_rails
