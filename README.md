@@ -13,7 +13,9 @@ This gem provides rack middlewared for such purposes.
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'e2e_testing_on_rails', github: 'YusukeIwaki/e2e_testing_on_rails'
+group :test do
+  gem 'e2e_testing_on_rails', github: 'YusukeIwaki/e2e_testing_on_rails'
+end
 ```
 
 then execute `bundle install`.
